@@ -2,5 +2,22 @@
     "name": "Jake",
     "version": "1.0",
     "description": "Live code examples for API documentation",
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "<all_urls>"
+    ],
+    "commands": {
+        "extractInput": {
+            "suggested_key": {
+                "default": "Ctrl+X"
+            },
+            "description": "extract selected text"
+        }
+    },
     "manifest_version": 2
 }
