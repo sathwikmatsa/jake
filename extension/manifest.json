@@ -6,6 +6,14 @@
         "scripts": ["background.js"],
         "persistent": false
     },
+    "content_scripts": [
+        {
+          "matches": [
+            "<all_urls>"
+          ],
+          "js": ["jquery.min.js"]
+        }
+    ],
     "permissions": [
         "tabs",
         "activeTab",
@@ -16,7 +24,7 @@
             "suggested_key": {
                 "default": "Ctrl+X"
             },
-            "description": "extract selected text"
+            "description": "extract selected/highlighted text"
         }
     },
     "manifest_version": 2
