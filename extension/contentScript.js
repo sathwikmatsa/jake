@@ -13,7 +13,7 @@ function getData(url, callback) {
   });
 }
 
-// this function converts the Xpath object into a list and returns it
+// this function retrieves elements using CSS selectors from the dom and returns an array 
 function css_selector(CSS_selector_string1, CSS_selector_string2, dom) {
   var data = [];
   var nodeList = dom.querySelectorAll(CSS_selector_string1);
