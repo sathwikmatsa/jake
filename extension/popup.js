@@ -1,19 +1,15 @@
-var inputText = window.getSelection().toString();
-var url = window.location.href;
-var element = window.getSelection().anchorNode.parentNode;
-
 var so_url_template = "https://stackoverflow.com/search?q=";
 
 function getData(url, callback) {
   // to overcome CORS, third party website is used to scrape raw document
 // use jquery to fetch the document
-  $.get('https://allorigins.me/get?method=raw&url=' + encodeURIComponent(url) + '&callback=?', function(data) {
+  $.get(url, function(data) {
       // data is the raw html dump
       callback(data);
   });
 }
 
-// this function retrieves elements using CSS selectors from the dom and returns an array 
+// this function retrieves elements using CSS selectors from the dom and returns an array
 function css_selector(CSS_selector_string1, CSS_selector_string2, dom) {
   var data = [];
   var nodeList = dom.querySelectorAll(CSS_selector_string1);
@@ -45,23 +41,48 @@ function searchStackOverflow(search_text, node) {
   });
 }
 
+function getAnswer(evt){
+    url = evt.currentTarget.url_link;
+    node = evt.currentTarget;
+	getData(url, function(data){
+    var dom = createElementFromHTML(data);
+		node.appendChild(dom.getElementsByClassName("post-text")[1]);
+	});
+}
+
 function display(data, node) {
     var container = document.createElement('div');
     var heading = document.createElement('p');
     var table = document.createElement('table');
+    table.className = "table table-bordered";
+    table.style.width= "400px";
     var tableBody = document.createElement('tbody');
+    var tableHead = document.createElement('thead');
+    tableHead.innerHTML = "<tr> <th scope='col'>#</th> <th scope='col'>Title</th> </tr>";
+    tableHead.className = "thead-dark";
+    table.appendChild(tableHead);
 
-    for (var i = 0; i < data.slice(0,10).length; i++) {
+    for (let i = 0; i < data.length; i++) {
       var row = document.createElement("tr");
+      var cellId = document.createElement('td');
+      cellId.innerText = i+1;
       var cell = document.createElement('td');
       var example = document.createElement('a');
+      example.style.backgroundColor = "white";
       example.href = "https://stackoverflow.com"+data[i].getAttribute("href");
       example.textContent = data[i].innerText
-      cell.appendChild(example);
+      var dropButton = document.createElement('button')
+      dropButton.type = "button";
+      dropButton.id = i;
+      dropButton.appendChild(example);
+      dropButton.url_link = example.href;
+      dropButton.addEventListener("click", getAnswer, false);
+      cell.appendChild(dropButton);
+      row.appendChild(cellId);
       row.appendChild(cell);
       tableBody.appendChild(row);
     }
-    heading.innerHTML = "<strong>Code Examples</strong>: (" + data.slice(0,10).length.toString() + " found)";
+    heading.innerHTML = "<strong>Code Examples</strong>: (" + data.length.toString() + " found)";
     table.appendChild(tableBody);
     container.appendChild(heading);
     container.appendChild(table);
@@ -69,7 +90,24 @@ function display(data, node) {
     container.style.margin = '2px';
     container.style.padding = '5px';
     container.style.color = '#333';
-    node.parentNode.insertBefore(container, node.nextSibling);
+    table.width = 400;
+    node.innerHTML="";
+    node.appendChild(container, node.nextSibling);
 }
-searchStackOverflow(inputText, element);
-alert("Success!");
+
+function setInputText(info){
+	var divEle = document.getElementById("data");
+	searchStackOverflow(info, divEle);
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+	chrome.tabs.query({
+		active: true,
+		currentWindow: true
+	}, function(tabs){
+		chrome.tabs.sendMessage(
+			tabs[0].id,
+			{from: 'popup'},
+			setInputText);
+	});
+});
